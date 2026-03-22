@@ -5,7 +5,7 @@ import { asyncHandler } from "../../lib/asyncHandler.js";
 import { User } from "../../models/User.js";
 import { sendMailSafe } from "../../services/email.js";
 import { otpLoginEmail } from "../../services/emailTemplates.js";
-import { signUserToken } from "../../services/authJwt.js";
+import { signPayToken, signUserToken } from "../../services/authJwt.js";
 import { generateOtp, hashOtp, verifyOtpHash } from "../../services/otp.js";
 import { canAccessProgram } from "../../services/access.js";
 import { applyOtpSend, checkOtpSendAllowed, clearOtpRateFields, } from "../../services/otpRateLimit.js";
@@ -42,8 +42,19 @@ authRouter.post("/auth/request-otp", otpLimiter, asyncHandler(async (req, res) =
         throw new ApiError(404, "No account for this email", { code: "NOT_FOUND" });
     }
     if (!canAccessProgram(user)) {
+        if (user.userType === "normal" && user.paymentStatus === "pending") {
+            throw new ApiError(403, "Complete payment first — then you can request a login code.", {
+                code: "NO_ACCESS",
+                details: {
+                    needsPayment: true,
+                    userId: user._id.toString(),
+                    payToken: signPayToken(user._id.toString()),
+                },
+            });
+        }
         throw new ApiError(403, "Complete payment or wait for approval", {
             code: "NO_ACCESS",
+            details: { needsPayment: false },
         });
     }
     const rate = checkOtpSendAllowed(user);
