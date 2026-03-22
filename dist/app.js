@@ -5,7 +5,10 @@ import mongoose from "mongoose";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import { v1Router } from "./routes/v1/index.js";
 import { razorpayWebhookHandler } from "./webhooks/razorpayWebhook.js";
-export function createApp(webOrigin) {
+/**
+ * @param webOrigins Allowed browser origins (CORS). Use comma-separated `WEB_ORIGIN` in env for prod + dev.
+ */
+export function createApp(webOrigins) {
     const app = express();
     /** Behind nginx/ALB/Cloudflare: set TRUST_PROXY=1 so rate limits use real client IP. */
     if (process.env.TRUST_PROXY === "1") {
@@ -13,7 +16,7 @@ export function createApp(webOrigin) {
     }
     app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
     app.use(cors({
-        origin: webOrigin,
+        origin: webOrigins,
         credentials: true,
     }));
     app.post("/webhooks/razorpay", express.raw({ type: "application/json" }), (req, res, next) => {

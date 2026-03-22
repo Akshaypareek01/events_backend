@@ -6,8 +6,12 @@ import { assertProductionSecrets } from "./lib/productionSecrets.js";
 assertProductionSecrets();
 const PORT = Number(process.env.PORT) || 4000;
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/yoga-event";
-const WEB_ORIGIN = process.env.WEB_ORIGIN || "http://localhost:3000";
-const app = createApp(WEB_ORIGIN);
+/** Comma-separated list, e.g. `http://localhost:3000,https://www.example.com` */
+const WEB_ORIGINS = (process.env.WEB_ORIGIN || "http://localhost:3000")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+const app = createApp(WEB_ORIGINS);
 async function main() {
     mongoose.set("strictQuery", true);
     try {
