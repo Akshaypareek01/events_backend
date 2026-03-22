@@ -20,6 +20,14 @@ export function createApp(webOrigin) {
         void razorpayWebhookHandler(req, res).catch(next);
     });
     app.use(express.json({ limit: "32kb" }));
+    app.get("/", (_req, res) => {
+        res.json({
+            ok: true,
+            message: "Welcome to the Events API",
+            service: "Samsara Yoga Events",
+            docs: "Use /api/v1/* for application routes; GET /health for status.",
+        });
+    });
     app.get("/health", (_req, res) => {
         const db = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
         res.json({ ok: true, db });
