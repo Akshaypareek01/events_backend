@@ -9,6 +9,7 @@ import { AdminUser } from "../../models/AdminUser.js";
 import { ClassSession } from "../../models/ClassSession.js";
 import { ProgramConfig } from "../../models/ProgramConfig.js";
 import { User } from "../../models/User.js";
+import { Teacher } from "../../models/Teacher.js";
 import { escapeRegex } from "../../lib/escapeRegex.js";
 import { normalizeDomainList } from "../../services/corporateAllowlist.js";
 import {
@@ -386,6 +387,134 @@ adminRouter.delete(
     const deleted = await User.findByIdAndDelete(id);
     if (!deleted) {
       throw new ApiError(404, "User not found", { code: "NOT_FOUND" });
+    }
+    res.json({ ok: true, id });
+  }),
+);
+
+const teacherUsernameSchema = z
+  .string()
+  .min(3)
+  .max(32)
+  .regex(/^[a-zA-Z0-9_]+$/, "Username: letters, numbers, underscores only");
+
+const createTeacherBodySchema = z.object({
+  username: teacherUsernameSchema,
+  password: z.string().min(6),
+  displayName: z.string().min(1).max(80).optional(),
+});
+
+const patchTeacherBodySchema = z.object({
+  password: z.string().min(6).optional(),
+  displayName: z.string().min(1).max(80).optional(),
+  active: z.boolean().optional(),
+});
+
+adminRouter.get(
+  "/teachers",
+  asyncHandler(async (_req, res) => {
+    const list = await Teacher.find().sort({ username: 1 });
+    res.json({
+      teachers: list.map((t) => ({
+        id: String(t._id),
+        username: t.username,
+        displayName: t.displayName || t.username,
+        active: t.active,
+        createdAt: t.createdAt,
+      })),
+    });
+  }),
+);
+
+adminRouter.post(
+  "/teachers",
+  asyncHandler(async (req, res) => {
+    const parsed = createTeacherBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid body", {
+        code: "VALIDATION",
+        details: parsed.error.flatten(),
+      });
+    }
+    const username = parsed.data.username.toLowerCase().trim();
+    const passwordHash = await bcrypt.hash(parsed.data.password, 10);
+    const displayName = (parsed.data.displayName?.trim() ?? "") || username;
+    try {
+      const doc = await Teacher.create({
+        username,
+        passwordHash,
+        displayName,
+        active: true,
+      });
+      res.status(201).json({
+        ok: true,
+        teacher: {
+          id: String(doc._id),
+          username: doc.username,
+          displayName: doc.displayName,
+        },
+      });
+    } catch (e: unknown) {
+      if (
+        e &&
+        typeof e === "object" &&
+        "code" in e &&
+        (e as { code?: number }).code === 11000
+      ) {
+        throw new ApiError(409, "Username already taken", { code: "DUPLICATE" });
+      }
+      throw e;
+    }
+  }),
+);
+
+adminRouter.patch(
+  "/teachers/:id",
+  asyncHandler(async (req, res) => {
+    const parsed = patchTeacherBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid body", {
+        code: "VALIDATION",
+        details: parsed.error.flatten(),
+      });
+    }
+    const id = String(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new ApiError(400, "Invalid id", { code: "VALIDATION" });
+    }
+    const t = await Teacher.findById(id);
+    if (!t) {
+      throw new ApiError(404, "Teacher not found", { code: "NOT_FOUND" });
+    }
+    const p = parsed.data;
+    if (p.password !== undefined) {
+      t.passwordHash = await bcrypt.hash(p.password, 10);
+    }
+    if (p.displayName !== undefined) t.displayName = p.displayName.trim();
+    if (p.active !== undefined) t.active = p.active;
+    await t.save();
+    res.json({
+      ok: true,
+      teacher: {
+        id: String(t._id),
+        username: t.username,
+        displayName: t.displayName || t.username,
+        active: t.active,
+      },
+    });
+  }),
+);
+
+adminRouter.delete(
+  "/teachers/:id",
+  asyncHandler(async (req, res) => {
+    const id = String(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new ApiError(400, "Invalid id", { code: "VALIDATION" });
+    }
+    const deleted = await Teacher.findByIdAndDelete(id);
+    if (!deleted) {
+      throw new ApiError(404, "Teacher not found", { code: "NOT_FOUND" });
     }
     res.json({ ok: true, id });
   }),

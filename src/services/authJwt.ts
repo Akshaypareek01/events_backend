@@ -4,7 +4,7 @@ const JWT_SECRET = process.env.JWT_SECRET ?? "dev-insecure-change-me";
 
 export type TokenPayload = {
   sub: string;
-  typ: "user" | "admin";
+  typ: "user" | "admin" | "teacher";
 };
 
 /** Short-lived token for /pay before user has a login JWT (issued at registration). */
@@ -22,6 +22,12 @@ export function signUserToken(userId: string): string {
 export function signAdminToken(adminId: string): string {
   return jwt.sign({ sub: adminId, typ: "admin" }, JWT_SECRET, {
     expiresIn: 2 * 24 * 60 * 60,
+  });
+}
+
+export function signTeacherToken(teacherId: string): string {
+  return jwt.sign({ sub: teacherId, typ: "teacher" }, JWT_SECRET, {
+    expiresIn: 7 * 24 * 60 * 60,
   });
 }
 
@@ -59,6 +65,20 @@ export function tryGetUserIdFromUserBearer(
   try {
     const p = verifyToken(token);
     return p.typ === "user" ? p.sub : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Optional teacher JWT from Authorization header (no throw). */
+export function tryGetTeacherIdFromTeacherBearer(
+  authHeader: string | undefined,
+): string | null {
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) return null;
+  try {
+    const p = verifyToken(token);
+    return p.typ === "teacher" ? p.sub : null;
   } catch {
     return null;
   }
