@@ -137,6 +137,51 @@ ${pPlain("Questions? Reply to this email and we'll help.")}`,
   return { subject, text, html };
 }
 
+/** Sent when an admin creates a teacher and supplies an email — includes username + password once. */
+export function teacherCredentialsEmail(params: {
+  displayName: string;
+  teacherLoginUrl: string;
+  username: string;
+  password: string;
+}): EmailPayload {
+  const subject = "Your teacher login — Samsara Yoga";
+  const u = params.username;
+  const text = `Hi ${params.displayName},
+
+An administrator created a teacher account for you.
+
+Sign in here:
+${params.teacherLoginUrl}
+
+Username: ${u}
+Password: ${params.password}
+
+Please sign in and change your password if the admin shared a temporary one.
+
+— Samsara Yoga`;
+
+  const userEsc = escapeHtml(u);
+  const passEsc = escapeHtml(params.password);
+  const credBox = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+  <tr><td style="padding:20px 24px;background:#ebe4d9;border-radius:12px;border:1px solid #d8cfc3;">
+    <p style="margin:0 0 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#1c1914;"><strong style="font-family:system-ui,sans-serif;">Username</strong><br/>${userEsc}</p>
+    <p style="margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#1c1914;"><strong style="font-family:system-ui,sans-serif;">Password</strong><br/>${passEsc}</p>
+  </td></tr>
+</table>`;
+
+  const html = emailDocument({
+    preheader: "Your teacher dashboard login details",
+    headline: "Teacher access is ready",
+    innerHtml: `${pPlain(`Hi ${escapeHtml(params.displayName)},`)}
+${pPlain("Your teacher account is set up. Use the button below to sign in, or copy your username and password from this email.")}
+${ctaButton(params.teacherLoginUrl, "Teacher login")}
+${credBox}
+${pPlain("Keep these details private. If you did not expect this email, contact your program administrator.")}`,
+  });
+
+  return { subject, text, html };
+}
+
 export function otpLoginEmail(params: { otp: string }): EmailPayload {
   const subject = "Your login code";
   const text = `Your one-time login code is:

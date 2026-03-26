@@ -23,6 +23,8 @@ import {
 } from "../../services/adminReminderSend.js";
 import { authAdmin } from "../../middleware/authAdmin.js";
 import { signAdminToken } from "../../services/authJwt.js";
+import { canDeliverEmail, sendMailSafe } from "../../services/email.js";
+import { teacherCredentialsEmail } from "../../services/emailTemplates.js";
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -402,12 +404,15 @@ const createTeacherBodySchema = z.object({
   username: teacherUsernameSchema,
   password: z.string().min(6),
   displayName: z.string().min(1).max(80).optional(),
+  /** If set, username + password are emailed to this address (when mail is configured). */
+  email: z.string().email().optional(),
 });
 
 const patchTeacherBodySchema = z.object({
   password: z.string().min(6).optional(),
   displayName: z.string().min(1).max(80).optional(),
   active: z.boolean().optional(),
+  email: z.union([z.string().email(), z.literal("")]).optional(),
 });
 
 adminRouter.get(
@@ -419,6 +424,7 @@ adminRouter.get(
         id: String(t._id),
         username: t.username,
         displayName: t.displayName || t.username,
+        email: t.email ?? null,
         active: t.active,
         createdAt: t.createdAt,
       })),
@@ -439,20 +445,57 @@ adminRouter.post(
     const username = parsed.data.username.toLowerCase().trim();
     const passwordHash = await bcrypt.hash(parsed.data.password, 10);
     const displayName = (parsed.data.displayName?.trim() ?? "") || username;
+    const emailLower = parsed.data.email?.trim().toLowerCase();
     try {
       const doc = await Teacher.create({
         username,
         passwordHash,
         displayName,
         active: true,
+        ...(emailLower ? { email: emailLower } : {}),
       });
+
+      let emailSent = false;
+      let emailNote: string | undefined;
+      if (emailLower) {
+        if (!canDeliverEmail()) {
+          emailNote =
+            "Teacher created. Email was not sent — configure SES or SMTP plus From (EMAIL_FROM / SMTP_FROM). Set WEB_ORIGIN for the correct login link in the message. Share credentials manually.";
+        } else {
+          const webOrigin = (process.env.WEB_ORIGIN ?? "http://localhost:3000").replace(/\/$/, "");
+          const teacherLoginUrl = `${webOrigin}/teacher/login`;
+          const mail = teacherCredentialsEmail({
+            displayName,
+            teacherLoginUrl,
+            username: doc.username,
+            password: parsed.data.password,
+          });
+          try {
+            await sendMailSafe({
+              to: emailLower,
+              subject: mail.subject,
+              text: mail.text,
+              html: mail.html,
+            });
+            emailSent = true;
+          } catch (sendErr) {
+            console.error("[admin] teacher credentials email failed", sendErr);
+            emailNote =
+              "Teacher saved, but sending the email failed. Check server logs and resend credentials manually.";
+          }
+        }
+      }
+
       res.status(201).json({
         ok: true,
         teacher: {
           id: String(doc._id),
           username: doc.username,
           displayName: doc.displayName,
+          email: doc.email ?? null,
         },
+        emailSent,
+        ...(emailNote ? { emailNote } : {}),
       });
     } catch (e: unknown) {
       if (
@@ -461,7 +504,7 @@ adminRouter.post(
         "code" in e &&
         (e as { code?: number }).code === 11000
       ) {
-        throw new ApiError(409, "Username already taken", { code: "DUPLICATE" });
+        throw new ApiError(409, "Username or email already in use", { code: "DUPLICATE" });
       }
       throw e;
     }
@@ -492,6 +535,9 @@ adminRouter.patch(
     }
     if (p.displayName !== undefined) t.displayName = p.displayName.trim();
     if (p.active !== undefined) t.active = p.active;
+    if (p.email !== undefined) {
+      t.email = p.email === "" ? undefined : p.email.toLowerCase().trim();
+    }
     await t.save();
     res.json({
       ok: true,
@@ -499,6 +545,7 @@ adminRouter.patch(
         id: String(t._id),
         username: t.username,
         displayName: t.displayName || t.username,
+        email: t.email ?? null,
         active: t.active,
       },
     });
