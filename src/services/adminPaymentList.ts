@@ -81,10 +81,10 @@ export async function listAdminPayments(params: {
   page: number;
   limit: number;
   match: Record<string, unknown>;
-  priceInr: number;
+  payableInr: number;
   currency: string;
 }): Promise<{ rows: AdminPaymentRow[]; total: number }> {
-  const { page, limit, match, priceInr, currency } = params;
+  const { page, limit, match, payableInr, currency } = params;
   const skip = (page - 1) * limit;
 
   const pipeline: PipelineStage[] = [
@@ -130,7 +130,7 @@ export async function listAdminPayments(params: {
     const free = u.paymentStatus === "free";
     const paid = u.paymentStatus === "paid";
     const pendingNormal = u.paymentStatus === "pending" && u.userType === "normal";
-    const amountInr = free ? 0 : paid || pendingNormal ? priceInr : 0;
+    const amountInr = free ? 0 : paid || pendingNormal ? payableInr : 0;
 
     return {
       id: String(u._id),

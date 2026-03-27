@@ -14,7 +14,7 @@ export type EmailPayload = { subject: string; text: string; html: string };
 function otpBox(otp: string): string {
   const o = escapeHtml(otp);
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
-  <tr><td align="center" style="padding:20px 24px;background:#ebe4d9;border-radius:12px;border:1px solid #d8cfc3;">
+  <tr><td align="center" style="padding:20px 24px;background:#fff3eb;border-radius:12px;border:1px solid #f7c5ac;">
     <p style="margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:28px;font-weight:600;letter-spacing:0.35em;color:#1c1914;">${o}</p>
   </td></tr>
 </table>`;
@@ -36,7 +36,7 @@ ${params.payUrl}
 
 If you've already completed payment, you can ignore this message.
 
-— Samsara Yoga`;
+— Samsara`;
 
   const html = emailDocument({
     preheader: `Reminder to complete payment for ${params.programTitle}`,
@@ -65,7 +65,7 @@ ${params.payUrl}
 
 If you didn't sign up, you can ignore this email.
 
-— Samsara Yoga`;
+— Samsara`;
 
   const html = emailDocument({
     preheader: `Complete payment to join ${params.programTitle}`,
@@ -92,7 +92,7 @@ Your corporate registration for ${params.programTitle} is confirmed.
 Open your dashboard to see schedules and join links:
 ${params.dashboardUrl}
 
-— Samsara Yoga`;
+— Samsara`;
 
   const html = emailDocument({
     preheader: `Corporate access is active for ${params.programTitle}`,
@@ -122,7 +122,7 @@ ${params.dashboardUrl}
 
 You'll find today's class times and links there. We're glad you're here.
 
-— Samsara Yoga`;
+— Samsara`;
 
   const html = emailDocument({
     preheader: `Payment received — you're enrolled in ${params.programTitle}`,
@@ -144,7 +144,7 @@ export function teacherCredentialsEmail(params: {
   username: string;
   password: string;
 }): EmailPayload {
-  const subject = "Your teacher login — Samsara Yoga";
+  const subject = "Your teacher login — Samsara";
   const u = params.username;
   const text = `Hi ${params.displayName},
 
@@ -158,12 +158,12 @@ Password: ${params.password}
 
 Please sign in and change your password if the admin shared a temporary one.
 
-— Samsara Yoga`;
+— Samsara`;
 
   const userEsc = escapeHtml(u);
   const passEsc = escapeHtml(params.password);
   const credBox = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
-  <tr><td style="padding:20px 24px;background:#ebe4d9;border-radius:12px;border:1px solid #d8cfc3;">
+  <tr><td style="padding:20px 24px;background:#fff3eb;border-radius:12px;border:1px solid #f7c5ac;">
     <p style="margin:0 0 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#1c1914;"><strong style="font-family:system-ui,sans-serif;">Username</strong><br/>${userEsc}</p>
     <p style="margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;color:#1c1914;"><strong style="font-family:system-ui,sans-serif;">Password</strong><br/>${passEsc}</p>
   </td></tr>
@@ -190,7 +190,7 @@ ${params.otp}
 
 It expires in 10 minutes. If you didn't try to sign in, you can ignore this email.
 
-— Samsara Yoga`;
+— Samsara`;
 
   const html = emailDocument({
     preheader: "Your one-time login code — expires in 10 minutes",
@@ -217,7 +217,7 @@ Today's sessions: morning ${params.morningTime}, evening ${params.eveningTime}.
 Join from your dashboard:
 ${params.dashboardUrl}
 
-— Samsara Yoga`;
+— Samsara`;
 
   const html = emailDocument({
     preheader: `Morning ${params.morningTime} · Evening ${params.eveningTime}`,

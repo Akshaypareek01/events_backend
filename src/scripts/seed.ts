@@ -15,7 +15,7 @@ async function seed() {
   await ProgramConfig.findOneAndUpdate(
     {},
     {
-      title: "Samsara Yoga — 3 Month Journey",
+      title: "Samsara — 3 Month Journey",
       durationMonths: 3,
       priceInr: 499,
       currency: "INR",

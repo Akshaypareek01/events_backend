@@ -21,6 +21,7 @@ import {
   sendClassSessionReminders,
   sendPaymentPendingReminders,
 } from "../../services/adminReminderSend.js";
+import { computeIndividualPayableInr } from "../../services/pricing.js";
 import { authAdmin } from "../../middleware/authAdmin.js";
 import { signAdminToken } from "../../services/authJwt.js";
 import { canDeliverEmail, sendMailSafe } from "../../services/email.js";
@@ -83,7 +84,8 @@ adminRouter.get(
   "/stats",
   asyncHandler(async (_req, res) => {
     const program = await ProgramConfig.findOne().sort({ updatedAt: -1 });
-    const priceInr = program?.priceInr ?? 499;
+    const basePriceInr = program?.priceInr ?? 499;
+    const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
     const domains = program?.allowedCorporateDomains ?? [];
 
@@ -94,7 +96,7 @@ adminRouter.get(
       User.countDocuments({ paymentStatus: "paid" }),
     ]);
 
-    const totalRevenueInr = paidRegistrations * priceInr;
+    const totalRevenueInr = paidRegistrations * payableInr;
 
     res.json({
       totalUsers,
@@ -103,7 +105,7 @@ adminRouter.get(
       corporateDomainsCount: domains.length,
       paidRegistrations,
       totalRevenueInr,
-      programPriceInr: priceInr,
+      programPriceInr: payableInr,
       currency,
     });
   }),
@@ -284,7 +286,8 @@ adminRouter.get(
     }
     const { page, limit, status } = parsed.data;
     const program = await ProgramConfig.findOne().sort({ updatedAt: -1 });
-    const priceInr = program?.priceInr ?? 499;
+    const basePriceInr = program?.priceInr ?? 499;
+    const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
 
     let fromDate: Date | undefined;
@@ -305,7 +308,7 @@ adminRouter.get(
       page,
       limit,
       match,
-      priceInr,
+      payableInr,
       currency,
     });
 
@@ -317,7 +320,7 @@ adminRouter.get(
       page,
       limit,
       totalPages,
-      programPriceInr: priceInr,
+      programPriceInr: payableInr,
       currency,
     });
   }),

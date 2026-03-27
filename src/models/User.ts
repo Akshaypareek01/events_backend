@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
     otpVerifyFailCount: { type: Number, default: 0 },
     /** After too many bad OTPs, block verify until this time. */
     otpVerifyLockedUntil: { type: Date },
+    /** Daily session lock (IST): once user joins one batch, only that batch is allowed for the day. */
+    joinedSessionDateKeyIst: { type: String, trim: true },
+    joinedSessionClassId: { type: String, trim: true },
+    joinedSessionAt: { type: Date },
   },
   { timestamps: true },
 );

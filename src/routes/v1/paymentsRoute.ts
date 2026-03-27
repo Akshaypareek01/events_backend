@@ -6,6 +6,7 @@ import { User } from "../../models/User.js";
 import { sendMailSafe } from "../../services/email.js";
 import { paymentSuccessEmail } from "../../services/emailTemplates.js";
 import { getProgramMeta } from "../../services/programConfig.js";
+import { computeIndividualPayableInr, inrToPaise } from "../../services/pricing.js";
 import { getRazorpay } from "../../services/razorpayClient.js";
 import { verifyPaymentSignature } from "../../services/razorpayVerify.js";
 import {
@@ -71,7 +72,8 @@ paymentsRouter.post(
     }
 
     const { priceInr, currency } = await getProgramMeta();
-    const amountPaise = Math.round(priceInr * 100);
+    const payableInr = computeIndividualPayableInr(priceInr);
+    const amountPaise = inrToPaise(payableInr);
 
     let rzp;
     try {
