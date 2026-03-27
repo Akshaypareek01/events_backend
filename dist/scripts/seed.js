@@ -20,25 +20,73 @@ async function seed() {
     const passwordHash = await bcrypt.hash(adminPassword, 10);
     await AdminUser.findOneAndUpdate({ email: adminEmail }, { email: adminEmail, passwordHash, role: "admin" }, { upsert: true, new: true, setDefaultsOnInsert: true });
     console.log(`Admin user: ${adminEmail} (password from ADMIN_SEED_PASSWORD or default changeme)`);
-    const count = await ClassSession.countDocuments();
-    if (count === 0) {
-        await ClassSession.insertMany([
-            {
-                title: "Morning Yoga",
-                timeLabel: "07:00 AM",
-                zoomLink: "https://zoom.us/j/REPLACE_MORNING",
-                type: "morning",
-                active: true,
-            },
-            {
-                title: "Evening Yoga",
-                timeLabel: "07:00 PM",
-                zoomLink: "https://zoom.us/j/REPLACE_EVENING",
-                type: "evening",
-                active: true,
-            },
-        ]);
+    const existingCount = await ClassSession.countDocuments();
+    if (existingCount > 0) {
+        await ClassSession.deleteMany({});
     }
+    const inserted = await ClassSession.insertMany([
+        {
+            title: "Morning Yoga - Batch 1",
+            timeLabel: "06:00 AM",
+            zoomLink: "https://zoom.us/j/REPLACE_MORNING_1",
+            type: "morning",
+            active: true,
+        },
+        {
+            title: "Morning Yoga - Batch 2",
+            timeLabel: "07:00 AM",
+            zoomLink: "https://zoom.us/j/REPLACE_MORNING_2",
+            type: "morning",
+            active: true,
+        },
+        {
+            title: "Morning Yoga - Batch 3",
+            timeLabel: "08:00 AM",
+            zoomLink: "https://zoom.us/j/REPLACE_MORNING_3",
+            type: "morning",
+            active: true,
+        },
+        {
+            title: "Morning Yoga - Batch 4",
+            timeLabel: "09:00 AM",
+            zoomLink: "https://zoom.us/j/REPLACE_MORNING_4",
+            type: "morning",
+            active: true,
+        },
+        {
+            title: "Evening Yoga - Batch 1",
+            timeLabel: "06:00 PM",
+            zoomLink: "https://zoom.us/j/REPLACE_EVENING_1",
+            type: "evening",
+            active: true,
+        },
+        {
+            title: "Evening Yoga - Batch 2",
+            timeLabel: "07:00 PM",
+            zoomLink: "https://zoom.us/j/REPLACE_EVENING_2",
+            type: "evening",
+            active: true,
+        },
+        {
+            title: "Evening Yoga - Batch 3",
+            timeLabel: "08:00 PM",
+            zoomLink: "https://zoom.us/j/REPLACE_EVENING_3",
+            type: "evening",
+            active: true,
+        },
+        {
+            title: "Evening Yoga - Batch 4",
+            timeLabel: "09:00 PM",
+            zoomLink: "https://zoom.us/j/REPLACE_EVENING_4",
+            type: "evening",
+            active: true,
+        },
+    ]);
+    const createdClasses = inserted.length;
+    const totalClasses = await ClassSession.countDocuments();
+    console.log(existingCount > 0
+        ? `Class sessions reset: removed ${existingCount}, created ${createdClasses} (total now: ${totalClasses})`
+        : `Class sessions created: ${createdClasses} (total now: ${totalClasses})`);
     console.log("Seed complete");
     await mongoose.disconnect();
 }

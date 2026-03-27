@@ -13,6 +13,12 @@ function legacySmtpConfigured() {
 export function isEmailConfigured() {
     return sesConfigured() || legacySmtpConfigured();
 }
+/** True when mail can actually be sent (transport + a usable From address). */
+export function canDeliverEmail() {
+    if (!isEmailConfigured())
+        return false;
+    return Boolean(resolveFromAddress());
+}
 function createSesTransport() {
     const port = Number(process.env.SES_SMTP_PORT) || 587;
     const secure = process.env.SES_SMTP_SECURE === "true" || port === 465;

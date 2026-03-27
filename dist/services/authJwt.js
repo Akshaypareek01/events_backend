@@ -10,6 +10,11 @@ export function signAdminToken(adminId) {
         expiresIn: 2 * 24 * 60 * 60,
     });
 }
+export function signTeacherToken(teacherId) {
+    return jwt.sign({ sub: teacherId, typ: "teacher" }, JWT_SECRET, {
+        expiresIn: 7 * 24 * 60 * 60,
+    });
+}
 export function verifyToken(token) {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (!decoded.sub || !decoded.typ) {
@@ -42,6 +47,19 @@ export function tryGetUserIdFromUserBearer(authHeader) {
     try {
         const p = verifyToken(token);
         return p.typ === "user" ? p.sub : null;
+    }
+    catch {
+        return null;
+    }
+}
+/** Optional teacher JWT from Authorization header (no throw). */
+export function tryGetTeacherIdFromTeacherBearer(authHeader) {
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    if (!token)
+        return null;
+    try {
+        const p = verifyToken(token);
+        return p.typ === "teacher" ? p.sub : null;
     }
     catch {
         return null;

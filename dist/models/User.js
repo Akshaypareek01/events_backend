@@ -11,11 +11,6 @@ const userSchema = new mongoose.Schema({
         enum: ["normal", "corporate"],
         required: true,
     },
-    gender: {
-        type: String,
-        enum: ["male", "female", "other"],
-        required: false,
-    },
     companyName: { type: String, trim: true },
     /** e.g. acme.com — corporate registrations only */
     companyDomain: { type: String, lowercase: true, trim: true },

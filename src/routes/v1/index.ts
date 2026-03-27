@@ -6,6 +6,7 @@ import { meRouter } from "./meRoute.js";
 import { classesRouter } from "./classesRoute.js";
 import { programRouter } from "./programRoute.js";
 import { adminRouter } from "./adminRoute.js";
+import { adminClassesRouter } from "./adminClassesRoute.js";
 import { teacherRouter } from "./teacherRoute.js";
 
 export const v1Router = Router();
@@ -17,4 +18,5 @@ v1Router.use(meRouter);
 v1Router.use(classesRouter);
 v1Router.use(programRouter);
 v1Router.use("/teacher", teacherRouter);
+v1Router.use("/admin", adminClassesRouter);
 v1Router.use("/admin", adminRouter);
