@@ -34,9 +34,11 @@ async function seed() {
   );
   console.log(`Admin user: ${adminEmail} (password from ADMIN_SEED_PASSWORD or default changeme)`);
 
-  const count = await ClassSession.countDocuments();
-  if (count === 0) {
-    await ClassSession.insertMany([
+  const existingCount = await ClassSession.countDocuments();
+  if (existingCount > 0) {
+    await ClassSession.deleteMany({});
+  }
+  const inserted = await ClassSession.insertMany([
       {
         title: "Morning Yoga - Batch 1",
         timeLabel: "06:00 AM",
@@ -78,9 +80,29 @@ async function seed() {
         zoomLink: "https://zoom.us/j/REPLACE_EVENING_2",
         type: "evening",
         active: true,
-      }
+      },
+      {
+        title: "Evening Yoga - Batch 3",
+        timeLabel: "08:00 PM",
+        zoomLink: "https://zoom.us/j/REPLACE_EVENING_3",
+        type: "evening",
+        active: true,
+      },
+      {
+        title: "Evening Yoga - Batch 4",
+        timeLabel: "09:00 PM",
+        zoomLink: "https://zoom.us/j/REPLACE_EVENING_4",
+        type: "evening",
+        active: true,
+      },
     ]);
-  }
+  const createdClasses = inserted.length;
+  const totalClasses = await ClassSession.countDocuments();
+  console.log(
+    existingCount > 0
+      ? `Class sessions reset: removed ${existingCount}, created ${createdClasses} (total now: ${totalClasses})`
+      : `Class sessions created: ${createdClasses} (total now: ${totalClasses})`,
+  );
 
   console.log("Seed complete");
   await mongoose.disconnect();
