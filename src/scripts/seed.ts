@@ -38,19 +38,47 @@ async function seed() {
   if (count === 0) {
     await ClassSession.insertMany([
       {
-        title: "Morning Yoga",
-        timeLabel: "07:00 AM",
-        zoomLink: "https://zoom.us/j/REPLACE_MORNING",
+        title: "Morning Yoga - Batch 1",
+        timeLabel: "06:00 AM",
+        zoomLink: "https://zoom.us/j/REPLACE_MORNING_1",
         type: "morning",
         active: true,
       },
       {
-        title: "Evening Yoga",
-        timeLabel: "07:00 PM",
-        zoomLink: "https://zoom.us/j/REPLACE_EVENING",
+        title: "Morning Yoga - Batch 2",
+        timeLabel: "07:00 AM",
+        zoomLink: "https://zoom.us/j/REPLACE_MORNING_2",
+        type: "morning",
+        active: true,
+      },
+      {
+        title: "Morning Yoga - Batch 3",
+        timeLabel: "08:00 AM",
+        zoomLink: "https://zoom.us/j/REPLACE_MORNING_3",
+        type: "morning",
+        active: true,
+      },
+      {
+        title: "Morning Yoga - Batch 4",
+        timeLabel: "09:00 AM",
+        zoomLink: "https://zoom.us/j/REPLACE_MORNING_4",
+        type: "morning",
+        active: true,
+      },
+      {
+        title: "Evening Yoga - Batch 1",
+        timeLabel: "06:00 PM",
+        zoomLink: "https://zoom.us/j/REPLACE_EVENING_1",
         type: "evening",
         active: true,
       },
+      {
+        title: "Evening Yoga - Batch 2",
+        timeLabel: "07:00 PM",
+        zoomLink: "https://zoom.us/j/REPLACE_EVENING_2",
+        type: "evening",
+        active: true,
+      }
     ]);
   }
 
