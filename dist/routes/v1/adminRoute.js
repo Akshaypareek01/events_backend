@@ -14,6 +14,7 @@ import { escapeRegex } from "../../lib/escapeRegex.js";
 import { normalizeDomainList } from "../../services/corporateAllowlist.js";
 import { buildAdminPaymentMatch, listAdminPayments, } from "../../services/adminPaymentList.js";
 import { getReminderPreview, sendClassSessionReminders, sendPaymentPendingReminders, } from "../../services/adminReminderSend.js";
+import { computeIndividualPayableInr } from "../../services/pricing.js";
 import { authAdmin } from "../../middleware/authAdmin.js";
 import { signAdminToken } from "../../services/authJwt.js";
 import { canDeliverEmail, sendMailSafe } from "../../services/email.js";
@@ -60,7 +61,8 @@ adminRouter.use(authAdmin);
 /** Dashboard aggregates: user counts, domain count, estimated revenue from paid seats. */
 adminRouter.get("/stats", asyncHandler(async (_req, res) => {
     const program = await ProgramConfig.findOne().sort({ updatedAt: -1 });
-    const priceInr = program?.priceInr ?? 499;
+    const basePriceInr = program?.priceInr ?? 499;
+    const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
     const domains = program?.allowedCorporateDomains ?? [];
     const [totalUsers, corporateUsers, individualUsers, paidRegistrations] = await Promise.all([
@@ -69,7 +71,7 @@ adminRouter.get("/stats", asyncHandler(async (_req, res) => {
         User.countDocuments({ userType: "normal" }),
         User.countDocuments({ paymentStatus: "paid" }),
     ]);
-    const totalRevenueInr = paidRegistrations * priceInr;
+    const totalRevenueInr = paidRegistrations * payableInr;
     res.json({
         totalUsers,
         corporateUsers,
@@ -77,7 +79,7 @@ adminRouter.get("/stats", asyncHandler(async (_req, res) => {
         corporateDomainsCount: domains.length,
         paidRegistrations,
         totalRevenueInr,
-        programPriceInr: priceInr,
+        programPriceInr: payableInr,
         currency,
     });
 }));
@@ -240,7 +242,8 @@ adminRouter.get("/payments", asyncHandler(async (req, res) => {
     }
     const { page, limit, status } = parsed.data;
     const program = await ProgramConfig.findOne().sort({ updatedAt: -1 });
-    const priceInr = program?.priceInr ?? 499;
+    const basePriceInr = program?.priceInr ?? 499;
+    const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
     let fromDate;
     let toDate;
@@ -258,7 +261,7 @@ adminRouter.get("/payments", asyncHandler(async (req, res) => {
         page,
         limit,
         match,
-        priceInr,
+        payableInr,
         currency,
     });
     const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -268,7 +271,7 @@ adminRouter.get("/payments", asyncHandler(async (req, res) => {
         page,
         limit,
         totalPages,
-        programPriceInr: priceInr,
+        programPriceInr: payableInr,
         currency,
     });
 }));

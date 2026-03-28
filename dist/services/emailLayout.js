@@ -1,14 +1,22 @@
 /**
  * Shared HTML shell for transactional mail (inline CSS for client compatibility).
- * Palette aligned with the web app: warm paper + forest green accent.
+ * Palette aligned with the web app: warm paper + orange accent.
  */
 const BG = "#f4f1ec";
 const SURFACE = "#fffcf7";
 const TEXT = "#1c1914";
 const MUTED = "#5c574e";
-const PRIMARY = "#2f5d50";
-const PRIMARY_FG = "#f7faf8";
+const PRIMARY = "#e8541a";
+const PRIMARY_FG = "#ffffff";
 const BORDER = "#d8cfc3";
+/** Header wordmark for transactional email (`/public/samsaralogomain.png` on the web app). */
+function resolveHeaderLogoUrl() {
+    const explicit = process.env.EMAIL_LOGO_URL?.trim();
+    if (explicit)
+        return explicit;
+    const webOrigin = (process.env.WEB_ORIGIN ?? "http://localhost:3000").trim().replace(/\/$/, "");
+    return `${webOrigin}/samsaralogomain.png`;
+}
 /** Escape user-controlled strings for HTML body text. */
 export function escapeHtml(s) {
     return s
@@ -42,9 +50,10 @@ function mutedLineEscaped(text) {
  * @param innerHtml - paragraphs, buttons, lists (trusted / escaped fragments only)
  */
 export function emailDocument(params) {
+    const logoUrl = resolveHeaderLogoUrl();
     const footer = params.footerLines?.length ?
         params.footerLines.map((l) => mutedLineEscaped(l)).join("")
-        : mutedLineEscaped("— Samsara Yoga");
+        : "";
     return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(params.headline)}</title></head>
@@ -54,7 +63,13 @@ ${preheaderBlock(params.preheader)}
   <tr><td align="center">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${SURFACE};border-radius:16px;border:1px solid ${BORDER};overflow:hidden;box-shadow:0 4px 24px rgba(28,25,20,0.06);">
       <tr><td style="padding:28px 28px 8px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">
-        <p style="margin:0 0 20px;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:${PRIMARY};">Samsara Yoga</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+          <tr>
+            <td>
+              <img src="${escapeHtml(logoUrl)}" alt="Samsara" width="220" style="display:block;max-width:220px;width:220px;height:auto;border:0;outline:none;text-decoration:none;" />
+            </td>
+          </tr>
+        </table>
         <h1 style="margin:0 0 20px;font-size:22px;font-weight:600;line-height:1.3;color:${TEXT};">${escapeHtml(params.headline)}</h1>
         ${params.innerHtml}
         ${footer}

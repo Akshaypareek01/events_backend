@@ -34,9 +34,7 @@ This is a friendly reminder to finish payment for ${params.programTitle}.
 Pay securely here:
 ${params.payUrl}
 
-If you've already completed payment, you can ignore this message.
-
-— Samsara`;
+If you've already completed payment, you can ignore this message.`;
 
   const html = emailDocument({
     preheader: `Reminder to complete payment for ${params.programTitle}`,
@@ -63,9 +61,7 @@ Thank you for registering for ${params.programTitle}.
 To confirm your place, please complete payment using the link below:
 ${params.payUrl}
 
-If you didn't sign up, you can ignore this email.
-
-— Samsara`;
+If you didn't sign up, you can ignore this email.`;
 
   const html = emailDocument({
     preheader: `Complete payment to join ${params.programTitle}`,
@@ -90,9 +86,7 @@ export function corporateRegisteredEmail(params: {
 Your corporate registration for ${params.programTitle} is confirmed.
 
 Open your dashboard to see schedules and join links:
-${params.dashboardUrl}
-
-— Samsara`;
+${params.dashboardUrl}`;
 
   const html = emailDocument({
     preheader: `Corporate access is active for ${params.programTitle}`,
@@ -120,9 +114,7 @@ We've received your payment — thank you. You're all set for ${params.programTi
 Your dashboard:
 ${params.dashboardUrl}
 
-You'll find today's class times and links there. We're glad you're here.
-
-— Samsara`;
+You'll find today's class times and links there. We're glad you're here.`;
 
   const html = emailDocument({
     preheader: `Payment received — you're enrolled in ${params.programTitle}`,
@@ -144,7 +136,7 @@ export function teacherCredentialsEmail(params: {
   username: string;
   password: string;
 }): EmailPayload {
-  const subject = "Your teacher login — Samsara";
+  const subject = "Your teacher login";
   const u = params.username;
   const text = `Hi ${params.displayName},
 
@@ -156,9 +148,7 @@ ${params.teacherLoginUrl}
 Username: ${u}
 Password: ${params.password}
 
-Please sign in and change your password if the admin shared a temporary one.
-
-— Samsara`;
+Please sign in and change your password if the admin shared a temporary one.`;
 
   const userEsc = escapeHtml(u);
   const passEsc = escapeHtml(params.password);
@@ -188,9 +178,7 @@ export function otpLoginEmail(params: { otp: string }): EmailPayload {
 
 ${params.otp}
 
-It expires in 10 minutes. If you didn't try to sign in, you can ignore this email.
-
-— Samsara`;
+It expires in 10 minutes. If you didn't try to sign in, you can ignore this email.`;
 
   const html = emailDocument({
     preheader: "Your one-time login code — expires in 10 minutes",
@@ -215,9 +203,7 @@ export function dailyReminderEmail(params: {
 Today's sessions: morning ${params.morningTime}, evening ${params.eveningTime}.
 
 Join from your dashboard:
-${params.dashboardUrl}
-
-— Samsara`;
+${params.dashboardUrl}`;
 
   const html = emailDocument({
     preheader: `Morning ${params.morningTime} · Evening ${params.eveningTime}`,
