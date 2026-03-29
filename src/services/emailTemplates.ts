@@ -1,15 +1,22 @@
 /**
- * Transactional email copy + HTML (multipart). Plain `text` is always included for accessibility.
+ * Transactional email copy + HTML (multipart). Plain `text` always ends with EMAIL_PLAIN_SIGN_OFF.
+ * Branding: header is wordmark image only (samsaralogomain.png via WEB_ORIGIN / EMAIL_LOGO_URL).
  */
 
 import {
   ctaButton,
+  EMAIL_PLAIN_SIGN_OFF,
   emailDocument,
   escapeHtml,
   pPlain,
 } from "./emailLayout.js";
 
 export type EmailPayload = { subject: string; text: string; html: string };
+
+/** Shared Yoga Mohotsav framing (80-day program). */
+const YOGA_MOHOTSAV_WELCOME = "Welcome to Yoga Mohotsav by Samsara Wellness.";
+const YOGA_MOHOTSAV_ENROLLED =
+  "You're officially enrolled in 80 days of nonstop yoga — Yoga Mohotsav.";
 
 function otpBox(otp: string): string {
   const o = escapeHtml(otp);
@@ -26,21 +33,24 @@ export function paymentReminderEmail(params: {
   payUrl: string;
   programTitle: string;
 }): EmailPayload {
-  const subject = `Reminder: complete your payment — ${params.programTitle}`;
+  const subject = `Yoga Mohotsav — complete your payment | Samsara Wellness`;
   const text = `Hi ${params.name},
 
-This is a friendly reminder to finish payment for ${params.programTitle}.
+${YOGA_MOHOTSAV_WELCOME}
+
+This is a reminder to finish payment for ${params.programTitle} so we can confirm your spot for 80 days of nonstop yoga.
 
 Pay securely here:
 ${params.payUrl}
 
-If you've already completed payment, you can ignore this message.`;
+If you've already paid, you can ignore this message.${EMAIL_PLAIN_SIGN_OFF}`;
 
   const html = emailDocument({
-    preheader: `Reminder to complete payment for ${params.programTitle}`,
+    preheader: `Complete payment for Yoga Mohotsav — ${params.programTitle}`,
     headline: "Complete your payment",
     innerHtml: `${pPlain(`Hi ${params.name},`)}
-${pPlain(`You're almost there — your spot for ${params.programTitle} is waiting on payment. Use the button below when you're ready.`)}
+${pPlain(YOGA_MOHOTSAV_WELCOME)}
+${pPlain(`You're almost there — finish payment for ${params.programTitle} to lock in your place for 80 days of nonstop yoga.`)}
 ${ctaButton(params.payUrl, "Pay now")}
 ${pPlain("If you already paid, no action needed — thank you.")}`,
   });
@@ -53,21 +63,24 @@ export function registrationEmail(params: {
   payUrl: string;
   programTitle: string;
 }): EmailPayload {
-  const subject = `Welcome — complete payment for ${params.programTitle}`;
+  const subject = `Welcome to Yoga Mohotsav — confirm your spot | Samsara Wellness`;
   const text = `Hi ${params.name},
 
-Thank you for registering for ${params.programTitle}.
+${YOGA_MOHOTSAV_WELCOME}
 
-To confirm your place, please complete payment using the link below:
+Thank you for registering for ${params.programTitle}. You're one step away from 80 days of nonstop yoga — Yoga Mohotsav.
+
+Complete payment here:
 ${params.payUrl}
 
-If you didn't sign up, you can ignore this email.`;
+If you didn't sign up, you can ignore this email.${EMAIL_PLAIN_SIGN_OFF}`;
 
   const html = emailDocument({
-    preheader: `Complete payment to join ${params.programTitle}`,
+    preheader: `Complete payment to join Yoga Mohotsav — ${params.programTitle}`,
     headline: "You're registered — one step left",
     innerHtml: `${pPlain(`Hi ${params.name},`)}
-${pPlain(`Thanks for choosing ${params.programTitle}. Complete your payment to unlock your dashboard and join live sessions.`)}
+${pPlain(YOGA_MOHOTSAV_WELCOME)}
+${pPlain(`Thanks for choosing ${params.programTitle}. Complete your payment to confirm your place for 80 days of nonstop yoga — Yoga Mohotsav.`)}
 ${ctaButton(params.payUrl, "Complete payment")}
 ${pPlain("Didn't create an account? You can safely ignore this email.")}`,
   });
@@ -77,24 +90,32 @@ ${pPlain("Didn't create an account? You can safely ignore this email.")}`,
 
 export function corporateRegisteredEmail(params: {
   name: string;
-  dashboardUrl: string;
+  signInUrl: string;
   programTitle: string;
 }): EmailPayload {
-  const subject = `You're in — ${params.programTitle} (corporate access)`;
+  const subject = `Yoga Mohotsav — corporate registration confirmed | Samsara Wellness`;
   const text = `Hi ${params.name},
 
-Your corporate registration for ${params.programTitle} is confirmed.
+${YOGA_MOHOTSAV_WELCOME}
 
-Open your dashboard to see schedules and join links:
-${params.dashboardUrl}`;
+${YOGA_MOHOTSAV_ENROLLED}
+
+Your corporate access for ${params.programTitle} is confirmed — no payment needed from you.
+
+Sign in with the same email you used to register. We'll send you a one-time code to finish logging in:
+${params.signInUrl}
+
+After you sign in, your dashboard has session times and Zoom links.${EMAIL_PLAIN_SIGN_OFF}`;
 
   const html = emailDocument({
-    preheader: `Corporate access is active for ${params.programTitle}`,
-    headline: "Your corporate access is ready",
+    preheader: `Corporate access confirmed — 80-day Yoga Mohotsav — ${params.programTitle}`,
+    headline: "You're registered — sign in to continue",
     innerHtml: `${pPlain(`Hi ${params.name},`)}
-${pPlain(`You're registered for ${params.programTitle} through your work email. Your organisation covers this program — no payment needed from you.`)}
-${ctaButton(params.dashboardUrl, "Open dashboard")}
-${pPlain("Use the same email to log in with a one-time code when prompted.")}`,
+${pPlain(YOGA_MOHOTSAV_WELCOME)}
+${pPlain(YOGA_MOHOTSAV_ENROLLED)}
+${pPlain(`You're registered for ${params.programTitle} through your organisation — no payment required.`)}
+${ctaButton(params.signInUrl, "Sign in")}
+${pPlain("Use the same email you registered with; we'll email you a one-time code. Then open your dashboard for schedules and join links.")}`,
   });
 
   return { subject, text, html };
@@ -106,22 +127,28 @@ export function paymentSuccessEmail(params: {
   dashboardUrl: string;
   programTitle: string;
 }): EmailPayload {
-  const subject = `Payment confirmed — welcome to ${params.programTitle}`;
+  const subject = `Welcome to Yoga Mohotsav — you're officially enrolled | Samsara Wellness`;
   const text = `Hi ${params.name},
+
+${YOGA_MOHOTSAV_WELCOME}
+
+${YOGA_MOHOTSAV_ENROLLED}
 
 We've received your payment — thank you. You're all set for ${params.programTitle}.
 
 Your dashboard:
 ${params.dashboardUrl}
 
-You'll find today's class times and links there. We're glad you're here.`;
+You'll find class times and Zoom links there.${EMAIL_PLAIN_SIGN_OFF}`;
 
   const html = emailDocument({
-    preheader: `Payment received — you're enrolled in ${params.programTitle}`,
-    headline: "Payment confirmed",
+    preheader: `Payment confirmed — Yoga Mohotsav — 80 days nonstop yoga`,
+    headline: "You're officially enrolled",
     innerHtml: `${pPlain(`Hi ${params.name},`)}
-${pPlain(`Thank you — your payment went through successfully. You're officially enrolled in ${params.programTitle}.`)}
-${pPlain("What's next: open your dashboard for session times, Zoom links, and updates.")}
+${pPlain(YOGA_MOHOTSAV_WELCOME)}
+${pPlain(YOGA_MOHOTSAV_ENROLLED)}
+${pPlain(`Your payment went through successfully. You're confirmed for ${params.programTitle}.`)}
+${pPlain("Open your dashboard for session times, Zoom links, and updates.")}
 ${ctaButton(params.dashboardUrl, "Go to dashboard")}
 ${pPlain("Questions? Reply to this email and we'll help.")}`,
   });
@@ -136,11 +163,11 @@ export function teacherCredentialsEmail(params: {
   username: string;
   password: string;
 }): EmailPayload {
-  const subject = "Your teacher login";
+  const subject = "Your teacher login — Yoga Mohotsav | Samsara Wellness";
   const u = params.username;
   const text = `Hi ${params.displayName},
 
-An administrator created a teacher account for you.
+An administrator created a Yoga Mohotsav teacher account for you.
 
 Sign in here:
 ${params.teacherLoginUrl}
@@ -148,7 +175,7 @@ ${params.teacherLoginUrl}
 Username: ${u}
 Password: ${params.password}
 
-Please sign in and change your password if the admin shared a temporary one.`;
+Please sign in and change your password if the admin shared a temporary one.${EMAIL_PLAIN_SIGN_OFF}`;
 
   const userEsc = escapeHtml(u);
   const passEsc = escapeHtml(params.password);
@@ -160,10 +187,10 @@ Please sign in and change your password if the admin shared a temporary one.`;
 </table>`;
 
   const html = emailDocument({
-    preheader: "Your teacher dashboard login details",
+    preheader: "Teacher dashboard login — Yoga Mohotsav",
     headline: "Teacher access is ready",
     innerHtml: `${pPlain(`Hi ${escapeHtml(params.displayName)},`)}
-${pPlain("Your teacher account is set up. Use the button below to sign in, or copy your username and password from this email.")}
+${pPlain("Your teacher account for Yoga Mohotsav is set up. Use the button below to sign in, or copy your username and password from this email.")}
 ${ctaButton(params.teacherLoginUrl, "Teacher login")}
 ${credBox}
 ${pPlain("Keep these details private. If you did not expect this email, contact your program administrator.")}`,
@@ -173,17 +200,17 @@ ${pPlain("Keep these details private. If you did not expect this email, contact 
 }
 
 export function otpLoginEmail(params: { otp: string }): EmailPayload {
-  const subject = "Your login code";
+  const subject = "Your Yoga Mohotsav login code | Samsara Wellness";
   const text = `Your one-time login code is:
 
 ${params.otp}
 
-It expires in 10 minutes. If you didn't try to sign in, you can ignore this email.`;
+It expires in 10 minutes. If you didn't try to sign in, you can ignore this email.${EMAIL_PLAIN_SIGN_OFF}`;
 
   const html = emailDocument({
     preheader: "Your one-time login code — expires in 10 minutes",
     headline: "Sign in to your account",
-    innerHtml: `${pPlain("Use this code to finish signing in. It expires in 10 minutes.")}
+    innerHtml: `${pPlain("Use this code to finish signing in to Yoga Mohotsav. It expires in 10 minutes.")}
 ${otpBox(params.otp)}
 ${pPlain("If you didn't request this, someone may have entered your email by mistake — you can ignore this message.")}`,
   });
@@ -197,16 +224,16 @@ export function dailyReminderEmail(params: {
   morningTime: string;
   eveningTime: string;
 }): EmailPayload {
-  const subject = "Today's live sessions";
+  const subject = `Yoga Mohotsav — today's live sessions | Samsara Wellness`;
   const text = `Hi ${params.name},
 
-Today's sessions: morning ${params.morningTime}, evening ${params.eveningTime}.
+Today's Yoga Mohotsav sessions: morning ${params.morningTime}, evening ${params.eveningTime}.
 
 Join from your dashboard:
-${params.dashboardUrl}`;
+${params.dashboardUrl}${EMAIL_PLAIN_SIGN_OFF}`;
 
   const html = emailDocument({
-    preheader: `Morning ${params.morningTime} · Evening ${params.eveningTime}`,
+    preheader: `Yoga Mohotsav · Morning ${params.morningTime} · Evening ${params.eveningTime}`,
     headline: "Today's sessions",
     innerHtml: `${pPlain(`Hi ${params.name},`)}
 ${pPlain(`Morning: ${params.morningTime} · Evening: ${params.eveningTime}`)}

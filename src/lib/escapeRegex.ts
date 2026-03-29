@@ -1,4 +1,4 @@
-/** Escape string for safe use inside RegExp / MongoDB $regex. */
-export function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** Escape a string for safe use inside a MongoDB / JS RegExp. */
+export function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

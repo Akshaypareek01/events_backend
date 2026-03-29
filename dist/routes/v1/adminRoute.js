@@ -7,6 +7,7 @@ import { ApiError } from "../../lib/ApiError.js";
 import { asyncHandler } from "../../lib/asyncHandler.js";
 import { AdminUser } from "../../models/AdminUser.js";
 import { ClassSession } from "../../models/ClassSession.js";
+import { CorporateCompany } from "../../models/CorporateCompany.js";
 import { ProgramConfig } from "../../models/ProgramConfig.js";
 import { User } from "../../models/User.js";
 import { Teacher } from "../../models/Teacher.js";
@@ -15,6 +16,7 @@ import { normalizeDomainList } from "../../services/corporateAllowlist.js";
 import { buildAdminPaymentMatch, listAdminPayments, } from "../../services/adminPaymentList.js";
 import { getReminderPreview, sendClassSessionReminders, sendPaymentPendingReminders, } from "../../services/adminReminderSend.js";
 import { computeIndividualPayableInr } from "../../services/pricing.js";
+import { normalizeProgramTitle, PUBLIC_PROGRAM_TITLE, } from "../../services/programConfig.js";
 import { authAdmin } from "../../middleware/authAdmin.js";
 import { signAdminToken } from "../../services/authJwt.js";
 import { canDeliverEmail, sendMailSafe } from "../../services/email.js";
@@ -65,11 +67,12 @@ adminRouter.get("/stats", asyncHandler(async (_req, res) => {
     const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
     const domains = program?.allowedCorporateDomains ?? [];
-    const [totalUsers, corporateUsers, individualUsers, paidRegistrations] = await Promise.all([
+    const [totalUsers, corporateUsers, individualUsers, paidRegistrations, corporateCompaniesCount] = await Promise.all([
         User.countDocuments(),
         User.countDocuments({ userType: "corporate" }),
         User.countDocuments({ userType: "normal" }),
         User.countDocuments({ paymentStatus: "paid" }),
+        CorporateCompany.countDocuments(),
     ]);
     const totalRevenueInr = paidRegistrations * payableInr;
     res.json({
@@ -77,6 +80,7 @@ adminRouter.get("/stats", asyncHandler(async (_req, res) => {
         corporateUsers,
         individualUsers,
         corporateDomainsCount: domains.length,
+        corporateCompaniesCount,
         paidRegistrations,
         totalRevenueInr,
         programPriceInr: payableInr,
@@ -94,7 +98,7 @@ adminRouter.get("/program", asyncHandler(async (_req, res) => {
     const doc = await ProgramConfig.findOne().sort({ updatedAt: -1 });
     if (!doc) {
         res.json({
-            title: "Samsara Yoga Program",
+            title: PUBLIC_PROGRAM_TITLE,
             durationMonths: 3,
             priceInr: 499,
             currency: "INR",
@@ -103,7 +107,7 @@ adminRouter.get("/program", asyncHandler(async (_req, res) => {
         return;
     }
     res.json({
-        title: doc.title,
+        title: normalizeProgramTitle(doc.title),
         durationMonths: doc.durationMonths,
         priceInr: doc.priceInr,
         currency: doc.currency,
@@ -138,7 +142,7 @@ adminRouter.patch("/program", asyncHandler(async (req, res) => {
     res.json({
         ok: true,
         program: {
-            title: doc.title,
+            title: normalizeProgramTitle(doc.title),
             durationMonths: doc.durationMonths,
             priceInr: doc.priceInr,
             currency: doc.currency,
@@ -220,6 +224,7 @@ adminRouter.get("/users", asyncHandler(async (req, res) => {
             country: u.country,
             companyName: u.companyName,
             companyDomain: u.companyDomain,
+            corporateCompanyId: u.corporateCompanyId ? String(u.corporateCompanyId) : undefined,
             userType: u.userType,
             paymentStatus: u.paymentStatus,
             isApproved: u.isApproved,

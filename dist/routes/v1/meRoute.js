@@ -18,6 +18,7 @@ meRouter.get("/me", authUser, asyncHandler(async (req, res) => {
             userType: user.userType,
             paymentStatus: user.paymentStatus,
             isApproved: user.isApproved,
+            companyName: user.companyName,
             canAccess: canAccessProgram({
                 userType: user.userType,
                 paymentStatus: user.paymentStatus,

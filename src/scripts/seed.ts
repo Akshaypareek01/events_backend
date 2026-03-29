@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import { AdminUser } from "../models/AdminUser.js";
 import { ClassSession } from "../models/ClassSession.js";
+import { CorporateCompany } from "../models/CorporateCompany.js";
 import { ProgramConfig } from "../models/ProgramConfig.js";
 
 const MONGODB_URI =
@@ -15,7 +16,7 @@ async function seed() {
   await ProgramConfig.findOneAndUpdate(
     {},
     {
-      title: "Samsara — 3 Month Journey",
+      title: "Samsara — 80-Day Yoga Mohotsav",
       durationMonths: 3,
       priceInr: 499,
       currency: "INR",
@@ -33,6 +34,15 @@ async function seed() {
     { upsert: true, new: true, setDefaultsOnInsert: true },
   );
   console.log(`Admin user: ${adminEmail} (password from ADMIN_SEED_PASSWORD or default changeme)`);
+
+  const corpCount = await CorporateCompany.countDocuments();
+  if (corpCount === 0) {
+    await CorporateCompany.create({
+      name: "Demo Corporation",
+      couponCode: "DEMO-YOGA-2026",
+    });
+    console.log("Sample corporate company: Demo Corporation — coupon DEMO-YOGA-2026");
+  }
 
   const existingCount = await ClassSession.countDocuments();
   if (existingCount > 0) {

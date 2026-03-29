@@ -49,11 +49,21 @@ function mutedLineEscaped(text) {
  * Wrap inner HTML (already safe or built from escapeHtml) in branded layout.
  * @param innerHtml - paragraphs, buttons, lists (trusted / escaped fragments only)
  */
+/** Plain-text closing for every transactional email (multipart). */
+export const EMAIL_PLAIN_SIGN_OFF = "\n\nRegards,\nTeam Samsara Wellness";
+function htmlSignOffBlock() {
+    const font = "Georgia,'Times New Roman',Times,serif";
+    return `<div style="margin-top:28px;padding-top:22px;border-top:1px solid ${BORDER};">
+  <p style="margin:0 0 6px;font-family:${font};font-size:14px;font-weight:400;color:${MUTED};line-height:1.55;">Regards,</p>
+  <p style="margin:0;font-family:${font};font-size:14px;font-weight:400;color:${MUTED};line-height:1.55;">Team Samsara Wellness</p>
+</div>`;
+}
 export function emailDocument(params) {
     const logoUrl = resolveHeaderLogoUrl();
     const footer = params.footerLines?.length ?
         params.footerLines.map((l) => mutedLineEscaped(l)).join("")
         : "";
+    const signOff = params.includeSignOff === false ? "" : htmlSignOffBlock();
     return `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${escapeHtml(params.headline)}</title></head>
@@ -63,16 +73,17 @@ ${preheaderBlock(params.preheader)}
   <tr><td align="center">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:${SURFACE};border-radius:16px;border:1px solid ${BORDER};overflow:hidden;box-shadow:0 4px 24px rgba(28,25,20,0.06);">
       <tr><td style="padding:28px 28px 8px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px;">
           <tr>
             <td>
-              <img src="${escapeHtml(logoUrl)}" alt="Samsara" width="220" style="display:block;max-width:220px;width:220px;height:auto;border:0;outline:none;text-decoration:none;" />
+              <img src="${escapeHtml(logoUrl)}" alt="Samsara Wellness" width="300" style="display:block;max-width:100%;width:300px;height:auto;border:0;outline:none;text-decoration:none;" />
             </td>
           </tr>
         </table>
         <h1 style="margin:0 0 20px;font-size:22px;font-weight:600;line-height:1.3;color:${TEXT};">${escapeHtml(params.headline)}</h1>
         ${params.innerHtml}
         ${footer}
+        ${signOff}
       </td></tr>
     </table>
   </td></tr>

@@ -14,7 +14,13 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     companyName: { type: String, trim: true },
-    /** e.g. acme.com — corporate registrations only */
+    /** Corporate program: link to admin-configured company. */
+    corporateCompanyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CorporateCompany",
+      sparse: true,
+    },
+    /** e.g. acme.com — optional; corporate may use any email (e.g. Gmail). */
     companyDomain: { type: String, lowercase: true, trim: true },
     /** @deprecated legacy; use email only for corporate */
     corporateEmail: { type: String, lowercase: true, trim: true },
@@ -28,7 +34,7 @@ const userSchema = new mongoose.Schema(
     razorpayPaymentId: { type: String, trim: true },
     /** Set when payment is confirmed (Razorpay verify / webhook / admin). */
     paidAt: { type: Date },
-    /** Email login OTP (Phase 07) */
+    /** Email login OTP (magic link / one-time code flow) */
     otpHash: { type: String },
     otpExpires: { type: Date },
     /** Throttle OTP emails: last send time, rolling window, count in window */
