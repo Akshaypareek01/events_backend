@@ -24,6 +24,7 @@ meRouter.get(
         paymentStatus: user.paymentStatus,
         isApproved: user.isApproved,
         companyName: user.companyName,
+        employeeId: user.employeeId,
         canAccess: canAccessProgram({
           userType: user.userType,
           paymentStatus: user.paymentStatus,

@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema(
       ref: "CorporateCompany",
       sparse: true,
     },
+    /** Corporate only; optional self-reported employee / staff ID. */
+    employeeId: { type: String, trim: true },
     /** e.g. acme.com — optional; corporate may use any email (e.g. Gmail). */
     companyDomain: { type: String, lowercase: true, trim: true },
     /** @deprecated legacy; use email only for corporate */

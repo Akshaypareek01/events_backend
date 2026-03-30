@@ -1,5 +1,4 @@
 import cron from "node-cron";
-import { ClassSession } from "../models/ClassSession.js";
 import { User } from "../models/User.js";
 import { canAccessProgram } from "../services/access.js";
 import { isEmailConfigured, sendMailSafe } from "../services/email.js";
@@ -20,8 +19,6 @@ export function startReminderCron(): void {
   cron.schedule(
     "0 8 * * *",
     async () => {
-      const morning = await ClassSession.findOne({ type: "morning", active: true });
-      const evening = await ClassSession.findOne({ type: "evening", active: true });
       const users = await User.find().limit(3000);
       const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
       for (const u of users) {
@@ -37,8 +34,6 @@ export function startReminderCron(): void {
         const mail = dailyReminderEmail({
           name: u.name,
           dashboardUrl: `${webOrigin}/dashboard`,
-          morningTime: morning?.timeLabel ?? "07:00 AM",
-          eveningTime: evening?.timeLabel ?? "07:00 PM",
         });
         await sendMailSafe({ to: u.email, ...mail });
       }

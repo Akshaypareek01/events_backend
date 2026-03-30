@@ -130,6 +130,11 @@ registerRouter.post(
       companyNameForUser = company.name;
     }
 
+    const employeeIdStored =
+      body.userType === "corporate" && body.employeeId?.trim()
+        ? body.employeeId.trim()
+        : undefined;
+
     const doc = await User.create({
       name: body.name,
       email: emailLower,
@@ -139,6 +144,7 @@ registerRouter.post(
       userType: body.userType,
       companyName: companyNameForUser,
       corporateCompanyId,
+      employeeId: employeeIdStored,
       companyDomain: domainFromEmail ?? undefined,
       paymentStatus: isCorporate ? "free" : "pending",
       isApproved: isCorporate,

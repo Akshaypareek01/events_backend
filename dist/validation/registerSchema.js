@@ -17,5 +17,7 @@ export const registerBodySchema = z.discriminatedUnion("userType", [
         userType: z.literal("corporate"),
         corporateCompanyId: z.string().trim().min(1, "Select your company"),
         corporateCouponCode: z.string().trim().min(1, "Coupon code is required"),
+        /** Optional — HR / payroll ID if the user chooses to provide it. */
+        employeeId: z.string().trim().max(120, "Employee ID is too long").optional(),
     }),
 ]);

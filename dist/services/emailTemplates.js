@@ -169,16 +169,14 @@ export function dailyReminderEmail(params) {
     const subject = `Yoga Mohotsav — today's live sessions | Samsara Wellness`;
     const text = `Hi ${params.name},
 
-Today's Yoga Mohotsav sessions: morning ${params.morningTime}, evening ${params.eveningTime}.
+Check your batch schedule on your dashboard for today's session times and join links.
 
-Join from your dashboard:
 ${params.dashboardUrl}${EMAIL_PLAIN_SIGN_OFF}`;
     const html = emailDocument({
-        preheader: `Yoga Mohotsav · Morning ${params.morningTime} · Evening ${params.eveningTime}`,
+        preheader: "Yoga Mohotsav · Check your dashboard for today’s schedule",
         headline: "Today's sessions",
         innerHtml: `${pPlain(`Hi ${params.name},`)}
-${pPlain(`Morning: ${params.morningTime} · Evening: ${params.eveningTime}`)}
-${pPlain("Join live from your dashboard — the link is the same each day.")}
+${pPlain("Open your dashboard to see your batch schedule and join today’s live sessions — times and Zoom links are listed there.")}
 ${ctaButton(params.dashboardUrl, "Open dashboard")}`,
     });
     return { subject, text, html };

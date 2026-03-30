@@ -206,6 +206,7 @@ adminRouter.get("/users", asyncHandler(async (req, res) => {
             { name: { $regex: esc, $options: "i" } },
             { email: { $regex: esc, $options: "i" } },
             { phone: { $regex: esc, $options: "i" } },
+            { employeeId: { $regex: esc, $options: "i" } },
         ];
     }
     const skip = (page - 1) * limit;
@@ -225,6 +226,7 @@ adminRouter.get("/users", asyncHandler(async (req, res) => {
             companyName: u.companyName,
             companyDomain: u.companyDomain,
             corporateCompanyId: u.corporateCompanyId ? String(u.corporateCompanyId) : undefined,
+            employeeId: u.employeeId,
             userType: u.userType,
             paymentStatus: u.paymentStatus,
             isApproved: u.isApproved,
