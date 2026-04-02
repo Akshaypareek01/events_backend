@@ -17,11 +17,26 @@ export async function getProgramMeta(): Promise<{
   title: string;
   priceInr: number;
   currency: string;
+  dashboardAlert?: { message: string; color: "info" | "success" | "warning" | "danger" };
 }> {
   const doc = await ProgramConfig.findOne().sort({ updatedAt: -1 });
+  const msg = doc?.dashboardAlertMessage?.trim();
   return {
     title: normalizeProgramTitle(doc?.title),
     priceInr: doc?.priceInr ?? 499,
     currency: doc?.currency ?? "INR",
+    dashboardAlert:
+      msg && msg.length > 0
+        ? {
+            message: msg,
+            color:
+              (doc?.dashboardAlertColor as
+                | "info"
+                | "success"
+                | "warning"
+                | "danger"
+                | undefined) ?? "info",
+          }
+        : undefined,
   };
 }

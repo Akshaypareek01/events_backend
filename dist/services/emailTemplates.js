@@ -74,7 +74,7 @@ Your corporate access for ${params.programTitle} is confirmed — no payment nee
 Sign in with the same email you used to register. We'll send you a one-time code to finish logging in:
 ${params.signInUrl}
 
-After you sign in, your dashboard has session times and Zoom links.${EMAIL_PLAIN_SIGN_OFF}`;
+After you sign in, your dashboard has session times and join links.${EMAIL_PLAIN_SIGN_OFF}`;
     const html = emailDocument({
         preheader: `Corporate access confirmed — 80-day Yoga Mohotsav — ${params.programTitle}`,
         headline: "You're registered — sign in to continue",
@@ -101,7 +101,7 @@ We've received your payment — thank you. You're all set for ${params.programTi
 Your dashboard:
 ${params.dashboardUrl}
 
-You'll find class times and Zoom links there.${EMAIL_PLAIN_SIGN_OFF}`;
+You'll find class times and join links there.${EMAIL_PLAIN_SIGN_OFF}`;
     const html = emailDocument({
         preheader: `Payment confirmed — Yoga Mohotsav — 80 days nonstop yoga`,
         headline: "You're officially enrolled",
@@ -109,7 +109,7 @@ You'll find class times and Zoom links there.${EMAIL_PLAIN_SIGN_OFF}`;
 ${pPlain(YOGA_MOHOTSAV_WELCOME)}
 ${pPlain(YOGA_MOHOTSAV_ENROLLED)}
 ${pPlain(`Your payment went through successfully. You're confirmed for ${params.programTitle}.`)}
-${pPlain("Open your dashboard for session times, Zoom links, and updates.")}
+${pPlain("Open your dashboard for session times, join links, and updates.")}
 ${ctaButton(params.dashboardUrl, "Go to dashboard")}
 ${pPlain("Questions? Reply to this email and we'll help.")}`,
     });
@@ -176,7 +176,7 @@ ${params.dashboardUrl}${EMAIL_PLAIN_SIGN_OFF}`;
         preheader: "Yoga Mohotsav · Check your dashboard for today’s schedule",
         headline: "Today's sessions",
         innerHtml: `${pPlain(`Hi ${params.name},`)}
-${pPlain("Open your dashboard to see your batch schedule and join today’s live sessions — times and Zoom links are listed there.")}
+${pPlain("Open your dashboard to see your batch schedule and join today’s live sessions — times and join links are listed there.")}
 ${ctaButton(params.dashboardUrl, "Open dashboard")}`,
     });
     return { subject, text, html };

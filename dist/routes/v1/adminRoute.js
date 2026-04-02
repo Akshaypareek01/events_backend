@@ -93,6 +93,8 @@ const patchProgramSchema = z.object({
     priceInr: z.number().min(0).optional(),
     durationMonths: z.number().min(1).optional(),
     currency: z.string().min(1).optional(),
+    dashboardAlertMessage: z.string().trim().max(300).optional(),
+    dashboardAlertColor: z.enum(["info", "success", "warning", "danger"]).optional(),
 });
 adminRouter.get("/program", asyncHandler(async (_req, res) => {
     const doc = await ProgramConfig.findOne().sort({ updatedAt: -1 });
@@ -103,6 +105,8 @@ adminRouter.get("/program", asyncHandler(async (_req, res) => {
             priceInr: 499,
             currency: "INR",
             allowedCorporateDomains: [],
+            dashboardAlertMessage: "",
+            dashboardAlertColor: "info",
         });
         return;
     }
@@ -112,6 +116,8 @@ adminRouter.get("/program", asyncHandler(async (_req, res) => {
         priceInr: doc.priceInr,
         currency: doc.currency,
         allowedCorporateDomains: doc.allowedCorporateDomains ?? [],
+        dashboardAlertMessage: doc.dashboardAlertMessage ?? "",
+        dashboardAlertColor: doc.dashboardAlertColor ?? "info",
     });
 }));
 adminRouter.patch("/program", asyncHandler(async (req, res) => {
@@ -138,6 +144,12 @@ adminRouter.patch("/program", asyncHandler(async (req, res) => {
     if (p.allowedCorporateDomains !== undefined) {
         doc.allowedCorporateDomains = normalizeDomainList(p.allowedCorporateDomains);
     }
+    if (p.dashboardAlertMessage !== undefined) {
+        doc.dashboardAlertMessage = p.dashboardAlertMessage.trim();
+    }
+    if (p.dashboardAlertColor !== undefined) {
+        doc.dashboardAlertColor = p.dashboardAlertColor;
+    }
     await doc.save();
     res.json({
         ok: true,
@@ -147,6 +159,8 @@ adminRouter.patch("/program", asyncHandler(async (req, res) => {
             priceInr: doc.priceInr,
             currency: doc.currency,
             allowedCorporateDomains: doc.allowedCorporateDomains ?? [],
+            dashboardAlertMessage: doc.dashboardAlertMessage ?? "",
+            dashboardAlertColor: doc.dashboardAlertColor ?? "info",
         },
     });
 }));
