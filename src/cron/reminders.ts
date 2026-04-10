@@ -1,10 +1,21 @@
 import cron from "node-cron";
-import { User } from "../models/User.js";
-import { canAccessProgram } from "../services/access.js";
-import { isEmailConfigured, sendMailSafe } from "../services/email.js";
-import { dailyReminderEmail } from "../services/emailTemplates.js";
+import { sendClassSessionReminders } from "../services/adminReminderSend.js";
+import { isEmailConfigured } from "../services/email.js";
 
-/** Daily digest (default 08:00 Asia/Kolkata). Disable with REMINDER_CRON=false. */
+/**
+ * Production batch windows (IST) → cron fires 30 minutes before class start.
+ * Each run emails eligible students (same audience as admin POST /reminders/class-sessions).
+ */
+const CLASS_REMINDER_SLOTS: readonly { expression: string; label: string }[] = [
+  { expression: "30 5 * * *", label: "05:30 — before 06:00–07:00" },
+  { expression: "0 7 * * *", label: "07:00 — before 07:30–08:30" },
+  { expression: "30 8 * * *", label: "08:30 — before 09:00–10:00" },
+  { expression: "30 10 * * *", label: "10:30 — before 11:00–12:00" },
+  { expression: "30 16 * * *", label: "16:30 — before 17:00–18:00" },
+  { expression: "30 18 * * *", label: "18:30 — before 19:00–20:00" },
+];
+
+/** Disable with REMINDER_CRON=false. Times use CRON_TZ (default Asia/Kolkata). */
 export function startReminderCron(): void {
   if (process.env.REMINDER_CRON === "false") {
     console.log("[cron] reminders disabled");
@@ -16,29 +27,28 @@ export function startReminderCron(): void {
   }
 
   const tz = process.env.CRON_TZ ?? "Asia/Kolkata";
-  cron.schedule(
-    "0 8 * * *",
-    async () => {
-      const users = await User.find().limit(3000);
-      const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
-      for (const u of users) {
-        if (
-          !canAccessProgram({
-            userType: u.userType,
-            paymentStatus: u.paymentStatus,
-            isApproved: u.isApproved,
-          })
-        ) {
-          continue;
+
+  for (const slot of CLASS_REMINDER_SLOTS) {
+    cron.schedule(
+      slot.expression,
+      async () => {
+        try {
+          const result = await sendClassSessionReminders();
+          console.log(
+            `[cron] class reminders (${slot.label} ${tz}): sent=${result.recipients} skippedNoAccess=${result.skippedNoAccess}`,
+          );
+        } catch (e) {
+          console.error(`[cron] class reminders failed (${slot.label})`, e);
         }
-        const mail = dailyReminderEmail({
-          name: u.name,
-          dashboardUrl: `${webOrigin}/dashboard`,
-        });
-        await sendMailSafe({ to: u.email, ...mail });
-      }
-    },
-    { timezone: tz },
+      },
+      { timezone: tz },
+    );
+  }
+
+  console.log(
+    `[cron] class session reminders: ${CLASS_REMINDER_SLOTS.length} daily slots (${tz})`,
   );
-  console.log(`[cron] daily reminders at 08:00 (${tz})`);
+  for (const s of CLASS_REMINDER_SLOTS) {
+    console.log(`[cron]   ${s.label}`);
+  }
 }
