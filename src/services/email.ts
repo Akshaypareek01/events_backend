@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { emailLogoAttachment } from "./emailLayout.js";
 
 /** AWS SES SMTP (preferred): endpoint + IAM SMTP user + password. */
 function sesConfigured(): boolean {
@@ -92,11 +93,13 @@ export async function sendMailSafe(options: {
     return;
   }
 
+  const logo = options.html?.includes("cid:samsara-logo") ? emailLogoAttachment() : null;
   await createTransport().sendMail({
     from,
     to: options.to,
     subject: options.subject,
     text: options.text,
     ...(options.html ? { html: options.html } : {}),
+    ...(logo ? { attachments: [logo] } : {}),
   });
 }

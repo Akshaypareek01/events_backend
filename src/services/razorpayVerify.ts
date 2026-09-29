@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { razorpayKeySecret } from "./razorpayClient.js";
 
 /** Verifies payment signature from Checkout `handler` response. */
 export function verifyPaymentSignature(params: {
@@ -6,7 +7,7 @@ export function verifyPaymentSignature(params: {
   paymentId: string;
   signature: string;
 }): boolean {
-  const secret = process.env.RAZORPAY_KEY_SECRET;
+  const secret = razorpayKeySecret();
   if (!secret) return false;
   const body = `${params.orderId}|${params.paymentId}`;
   const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");

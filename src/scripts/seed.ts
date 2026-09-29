@@ -18,7 +18,7 @@ async function seed() {
     {
       title: "Samsara — 80-Day Yoga Mohotsav",
       durationMonths: 3,
-      priceInr: 499,
+      priceInr: 199,
       currency: "INR",
       allowedCorporateDomains: [],
     },

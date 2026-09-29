@@ -7,7 +7,7 @@ import { sendMailSafe } from "../../services/email.js";
 import { paymentSuccessEmail } from "../../services/emailTemplates.js";
 import { getProgramMeta } from "../../services/programConfig.js";
 import { computeIndividualPayableInr, inrToPaise } from "../../services/pricing.js";
-import { getRazorpay } from "../../services/razorpayClient.js";
+import { getRazorpay, razorpayKeyId } from "../../services/razorpayClient.js";
 import { verifyPaymentSignature } from "../../services/razorpayVerify.js";
 import {
   tryGetUserIdFromUserBearer,
@@ -97,7 +97,7 @@ paymentsRouter.post(
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
+      keyId: razorpayKeyId(),
     });
   }),
 );

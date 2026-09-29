@@ -23,7 +23,7 @@ export async function getProgramMeta(): Promise<{
   const msg = doc?.dashboardAlertMessage?.trim();
   return {
     title: normalizeProgramTitle(doc?.title),
-    priceInr: doc?.priceInr ?? 499,
+    priceInr: doc?.priceInr ?? 199,
     currency: doc?.currency ?? "INR",
     dashboardAlert:
       msg && msg.length > 0

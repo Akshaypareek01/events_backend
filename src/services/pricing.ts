@@ -1,8 +1,6 @@
-const GST_RATE = 0.18;
-
-/** Base + GST total payable amount for individual users. */
-export function computeIndividualPayableInr(basePriceInr: number): number {
-  return Number((basePriceInr * (1 + GST_RATE)).toFixed(2));
+/** Listed program price is already GST-inclusive. Do not add tax on top. */
+export function computeIndividualPayableInr(priceInrInclusive: number): number {
+  return Number(priceInrInclusive.toFixed(2));
 }
 
 /** Convert INR to paise with proper rounding for gateway amounts. */
@@ -10,6 +8,5 @@ export function inrToPaise(amountInr: number): number {
   return Math.round(amountInr * 100);
 }
 
-export const PRICING = {
-  GST_RATE,
-} as const;
+/** Default checkout amount in INR, GST included. */
+export const INCLUSIVE_PRICE_INR = 199;

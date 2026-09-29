@@ -89,7 +89,7 @@ adminRouter.get(
   "/stats",
   asyncHandler(async (_req, res) => {
     const program = await ProgramConfig.findOne().sort({ updatedAt: -1 });
-    const basePriceInr = program?.priceInr ?? 499;
+    const basePriceInr = program?.priceInr ?? 199;
     const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
     const domains = program?.allowedCorporateDomains ?? [];
@@ -137,7 +137,7 @@ adminRouter.get(
       res.json({
         title: PUBLIC_PROGRAM_TITLE,
         durationMonths: 3,
-        priceInr: 499,
+        priceInr: 199,
         currency: "INR",
         allowedCorporateDomains: [],
         dashboardAlertMessage: "",
@@ -311,7 +311,7 @@ adminRouter.get(
     }
     const { page, limit, status } = parsed.data;
     const program = await ProgramConfig.findOne().sort({ updatedAt: -1 });
-    const basePriceInr = program?.priceInr ?? 499;
+    const basePriceInr = program?.priceInr ?? 199;
     const payableInr = computeIndividualPayableInr(basePriceInr);
     const currency = program?.currency ?? "INR";
 
